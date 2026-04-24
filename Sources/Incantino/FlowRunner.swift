@@ -6,7 +6,7 @@ import Foundation
 // MARK: - FlowStepConfig
 
 /// Per-step configuration within a flow.
-public struct FlowStepConfig: Sendable {
+public struct FlowStepConfig: Codable, Sendable {
     /// Boolean expression; if true when entering the step, skip it.
     public let skipIf: String?
     /// Marks the step as a terminal (no forward navigation).
@@ -24,7 +24,7 @@ public struct FlowStepConfig: Sendable {
 // MARK: - FlowConfig
 
 /// Configuration for a flow: ordered steps and per-step config.
-public struct FlowConfig: Sendable {
+public struct FlowConfig: Codable, Sendable {
     /// Ordered array of screen IDs.
     public let steps: [String]
     /// Per-step configuration, keyed by screen ID.
