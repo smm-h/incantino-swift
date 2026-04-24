@@ -1,0 +1,43 @@
+{
+  "name": "Classic",
+  "colors": {
+    "background": { "light": "#FFFFFF", "dark": "#1A1A1A" },
+    "surface": { "light": "#F5F5F5", "dark": "#2A2A2A" },
+    "surfaceElevated": { "light": "#FFFFFF", "dark": "#333333" },
+    "accent": { "light": "#007AFF", "dark": "#0A84FF" },
+    "accentSecondary": { "light": "#5856D6", "dark": "#5E5CE6" },
+    "textPrimary": { "light": "#000000", "dark": "#FFFFFF" },
+    "textSecondary": { "light": "#6B7280", "dark": "#9CA3AF" },
+    "separator": { "light": "#E5E7EB", "dark": "#374151" },
+    "error": { "light": "#EF4444", "dark": "#F87171" },
+    "success": { "light": "#22C55E", "dark": "#4ADE80" },
+    "transit": { "light": "#F59E0B", "dark": "#FBBF24" }
+  },
+  "spacing": {
+    "xs": 4,
+    "sm": 8,
+    "md": 16,
+    "lg": 24,
+    "xl": 32,
+    "xxl": 48
+  },
+  "typography": {
+    "largeTitle": { "family": null, "weight": "bold", "size": 34 },
+    "title": { "family": null, "weight": "bold", "size": 28 },
+    "headline": { "family": null, "weight": "semibold", "size": 17 },
+    "subheadline": { "family": null, "weight": "regular", "size": 15 },
+    "body": { "family": null, "weight": "regular", "size": 17 },
+    "caption": { "family": null, "weight": "regular", "size": 12 },
+    "price": { "family": null, "weight": "bold", "size": 24 }
+  },
+  "cornerRadii": {
+    "chip": 20,
+    "button": 12,
+    "card": 16
+  },
+  "animation": {
+    "fast": 0.15,
+    "standard": 0.30,
+    "slow": 0.50
+  }
+}

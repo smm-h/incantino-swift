@@ -1,0 +1,43 @@
+{
+  "name": "Liquid Glass",
+  "colors": {
+    "background": { "light": "#F8F9FA", "dark": "#0D0D0D" },
+    "surface": { "light": "#80FFFFFF", "dark": "#40FFFFFF" },
+    "surfaceElevated": { "light": "#B3FFFFFF", "dark": "#59FFFFFF" },
+    "accent": { "light": "#0071E3", "dark": "#2997FF" },
+    "accentSecondary": { "light": "#6E5DE7", "dark": "#7D6EF0" },
+    "textPrimary": { "light": "#1D1D1F", "dark": "#F5F5F7" },
+    "textSecondary": { "light": "#86868B", "dark": "#A1A1A6" },
+    "separator": { "light": "#33D1D1D6", "dark": "#3348484A" },
+    "error": { "light": "#FF3B30", "dark": "#FF6961" },
+    "success": { "light": "#34C759", "dark": "#30D158" },
+    "transit": { "light": "#FF9500", "dark": "#FFB340" }
+  },
+  "spacing": {
+    "xs": 4,
+    "sm": 8,
+    "md": 16,
+    "lg": 24,
+    "xl": 32,
+    "xxl": 48
+  },
+  "typography": {
+    "largeTitle": { "family": null, "weight": "bold", "size": 34 },
+    "title": { "family": null, "weight": "bold", "size": 28 },
+    "headline": { "family": null, "weight": "semibold", "size": 17 },
+    "subheadline": { "family": null, "weight": "regular", "size": 15 },
+    "body": { "family": null, "weight": "regular", "size": 17 },
+    "caption": { "family": null, "weight": "regular", "size": 12 },
+    "price": { "family": null, "weight": "semibold", "size": 24 }
+  },
+  "cornerRadii": {
+    "chip": 24,
+    "button": 14,
+    "card": 20
+  },
+  "animation": {
+    "fast": 0.2,
+    "standard": 0.35,
+    "slow": 0.6
+  }
+}
