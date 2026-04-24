@@ -1,4 +1,1 @@
-// IncantinoUI.swift
-// Placeholder for the IncantinoUI target.
-
-import Incantino
+@_exported import Incantino
