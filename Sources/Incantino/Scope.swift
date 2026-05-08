@@ -116,7 +116,7 @@ extension JSONValue {
 // MARK: - Number formatting
 
 /// Format a number for display: drop .0 for whole numbers.
-func formatNumber(_ n: Double) -> String {
+public func formatNumber(_ n: Double) -> String {
     if n.truncatingRemainder(dividingBy: 1) == 0 && n.isFinite {
         return String(Int(n))
     }
