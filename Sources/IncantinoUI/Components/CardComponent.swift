@@ -92,6 +92,11 @@ public struct CardComponent: IncantinoComponent {
 
     private var contentAndFooter: some View {
         VStack(alignment: .leading, spacing: 0) {
+            if spec.slots?["header"]?.isEmpty == false {
+                slotView("header")
+                    .padding(.horizontal, theme.spacingMD)
+                    .padding(.top, theme.spacingSM)
+            }
             slotView("content")
                 .padding(theme.spacingMD)
             if spec.slots?["footer"]?.isEmpty == false {
