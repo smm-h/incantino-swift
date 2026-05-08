@@ -32,12 +32,6 @@ public struct ScreenRenderer: View {
                 }
             }
         }
-        .onAppear {
-            // Sync screen-level named actions to the dispatcher for resolution.
-            if let dispatcher = context.dispatch as? ActionDispatcher {
-                dispatcher.screenActions = screen.actions ?? [:]
-            }
-        }
     }
 
     /// Resolve a single section to a view.

@@ -17,10 +17,6 @@ public final class ActionDispatcher: ActionDispatching {
     private var handlers: [String: any ActionHandling] = [:]
     private var middleware: [any ActionMiddleware] = []
 
-    /// Named action definitions from the current screen's `actions` map.
-    /// Set by the rendering layer when a screen is loaded.
-    public var screenActions: [String: NamedActionDefinition] = [:]
-
     /// Pending confirmation dialog state. Views observe this to show confirmation alerts.
     public var pendingConfirmation: PendingConfirmation?
 
@@ -39,7 +35,7 @@ public final class ActionDispatcher: ActionDispatching {
 
     // MARK: - Dispatch
 
-    public func dispatch(_ spec: ActionSpec, scope: any ScopeReading) async {
+    public func dispatch(_ spec: ActionSpec, scope: any ScopeReading, screenActions: [String: NamedActionDefinition]) async {
         // Step 1: Guard evaluation -- if guard expression is false, skip entirely.
         if let guardExpr = spec.guard {
             if !evaluate(expression: guardExpr, scope: scope) {
@@ -50,7 +46,7 @@ public final class ActionDispatcher: ActionDispatching {
 
         // Step 2: Named action resolution -- resolve before confirm/haptic so that
         // merged confirm/onSuccess/onError from the named definition are applied.
-        let resolved = resolveNamedAction(spec)
+        let resolved = resolveNamedAction(spec, screenActions: screenActions)
         guard let resolved else { return }
 
         // Step 3: Confirmation dialog -- uses the resolved (merged) confirm.
@@ -75,11 +71,11 @@ public final class ActionDispatcher: ActionDispatching {
         if let handlerError {
             logger.error("Action \(action) failed: \(handlerError.localizedDescription)")
             if let onError = resolved.onError {
-                await dispatch(onError.value, scope: scope)
+                await dispatch(onError.value, scope: scope, screenActions: screenActions)
             }
         } else {
             if let onSuccess = resolved.onSuccess {
-                await dispatch(onSuccess.value, scope: scope)
+                await dispatch(onSuccess.value, scope: scope, screenActions: screenActions)
             }
         }
     }
@@ -90,7 +86,7 @@ public final class ActionDispatcher: ActionDispatching {
     /// If the action is built-in or has a registered handler, returns the spec unchanged.
     /// If it matches a screen-level named action, resolves to a `submit` action.
     /// Returns nil if the action cannot be resolved (logs a warning).
-    private func resolveNamedAction(_ spec: ActionSpec) -> ActionSpec? {
+    private func resolveNamedAction(_ spec: ActionSpec, screenActions: [String: NamedActionDefinition]) -> ActionSpec? {
         // Check built-in actions and registered handlers first.
         if SDUIAction(rawValue: spec.action) != nil || handlers[spec.action] != nil {
             return spec

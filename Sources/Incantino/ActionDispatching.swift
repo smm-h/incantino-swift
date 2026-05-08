@@ -10,7 +10,7 @@ import Foundation
 @MainActor
 public protocol ActionDispatching: AnyObject {
     /// Dispatch an ActionSpec through the full pipeline (guard, confirm, haptic, handler, chaining).
-    func dispatch(_ spec: ActionSpec, scope: any ScopeReading) async
+    func dispatch(_ spec: ActionSpec, scope: any ScopeReading, screenActions: [String: NamedActionDefinition]) async
 
     /// Register a handler for an action type.
     func register(action: String, handler: any ActionHandling)
@@ -46,7 +46,7 @@ public protocol ActionMiddleware {
 public final class NoOpDispatcher: ActionDispatching {
     public init() {}
 
-    public func dispatch(_ spec: ActionSpec, scope: any ScopeReading) async {
+    public func dispatch(_ spec: ActionSpec, scope: any ScopeReading, screenActions: [String: NamedActionDefinition]) async {
         // No-op.
     }
 

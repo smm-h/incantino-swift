@@ -35,7 +35,7 @@ public struct ButtonComponent: IncantinoComponent {
             let dispatcher = context.dispatch
             let scope = context.scope
             Task { @MainActor in
-                await dispatcher.dispatch(action, scope: scope)
+                await dispatcher.dispatch(action, scope: scope, screenActions: context.screenActions)
             }
         } label: {
             HStack(spacing: 6) {
