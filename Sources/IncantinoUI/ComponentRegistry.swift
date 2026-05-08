@@ -72,7 +72,7 @@ public final class ComponentRegistry {
 
 /// Environment key for injecting a ComponentRegistry into the SwiftUI view hierarchy.
 struct ComponentRegistryKey: EnvironmentKey {
-    @MainActor static let defaultValue = ComponentRegistry.shared
+    nonisolated(unsafe) static let defaultValue = ComponentRegistry.shared
 }
 
 extension EnvironmentValues {
