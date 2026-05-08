@@ -149,33 +149,8 @@ import UIKit
 extension UIColor {
     /// Creates a UIColor from a hex string. Returns nil for invalid input.
     convenience init?(hex: String) {
-        var hexString = hex.trimmingCharacters(in: .whitespacesAndNewlines)
-        if hexString.hasPrefix("#") {
-            hexString.removeFirst()
-        }
-
-        var rgbValue: UInt64 = 0
-        guard Scanner(string: hexString).scanHexInt64(&rgbValue) else {
-            return nil
-        }
-
-        let r, g, b, a: CGFloat
-        switch hexString.count {
-        case 6:
-            r = CGFloat((rgbValue >> 16) & 0xFF) / 255.0
-            g = CGFloat((rgbValue >> 8) & 0xFF) / 255.0
-            b = CGFloat(rgbValue & 0xFF) / 255.0
-            a = 1.0
-        case 8:
-            a = CGFloat((rgbValue >> 24) & 0xFF) / 255.0
-            r = CGFloat((rgbValue >> 16) & 0xFF) / 255.0
-            g = CGFloat((rgbValue >> 8) & 0xFF) / 255.0
-            b = CGFloat(rgbValue & 0xFF) / 255.0
-        default:
-            return nil
-        }
-
-        self.init(red: r, green: g, blue: b, alpha: a)
+        guard let c = parseHexComponents(hex) else { return nil }
+        self.init(red: c.r, green: c.g, blue: c.b, alpha: c.a)
     }
 }
 #endif
@@ -186,33 +161,8 @@ import AppKit
 extension NSColor {
     /// Creates an NSColor from a hex string. Returns nil for invalid input.
     convenience init?(hex: String) {
-        var hexString = hex.trimmingCharacters(in: .whitespacesAndNewlines)
-        if hexString.hasPrefix("#") {
-            hexString.removeFirst()
-        }
-
-        var rgbValue: UInt64 = 0
-        guard Scanner(string: hexString).scanHexInt64(&rgbValue) else {
-            return nil
-        }
-
-        let r, g, b, a: CGFloat
-        switch hexString.count {
-        case 6:
-            r = CGFloat((rgbValue >> 16) & 0xFF) / 255.0
-            g = CGFloat((rgbValue >> 8) & 0xFF) / 255.0
-            b = CGFloat(rgbValue & 0xFF) / 255.0
-            a = 1.0
-        case 8:
-            a = CGFloat((rgbValue >> 24) & 0xFF) / 255.0
-            r = CGFloat((rgbValue >> 16) & 0xFF) / 255.0
-            g = CGFloat((rgbValue >> 8) & 0xFF) / 255.0
-            b = CGFloat(rgbValue & 0xFF) / 255.0
-        default:
-            return nil
-        }
-
-        self.init(red: r, green: g, blue: b, alpha: a)
+        guard let c = parseHexComponents(hex) else { return nil }
+        self.init(red: c.r, green: c.g, blue: c.b, alpha: c.a)
     }
 }
 #endif
