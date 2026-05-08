@@ -14,6 +14,7 @@ public enum SDUIAction: String, Sendable, CaseIterable {
     case sheetDismiss = "sheet.dismiss"
     case flowNext = "flow.next"
     case flowBack = "flow.back"
+    case flowGoTo = "flow.goTo"
     case submit
     case setFormValue
     case refresh
