@@ -2,6 +2,9 @@
 // The main entry point for rendering Incantino screens.
 
 import SwiftUI
+import os
+
+private let logger = Logger(subsystem: "Incantino", category: "IncantinoView")
 
 /// The main entry point for rendering Incantino screens.
 /// Use this view in your app's root or navigation stack.
@@ -79,7 +82,7 @@ struct IncantinoContent: View {
                     }
                 }
             } catch {
-                // Graceful degradation -- show empty state.
+                logger.error("Failed to load config: \(error)")
             }
             isLoading = false
         }
