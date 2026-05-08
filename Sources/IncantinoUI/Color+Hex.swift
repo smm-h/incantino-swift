@@ -7,7 +7,7 @@ extension Color {
     /// Creates a Color from a hex string (e.g. "#FF5733" or "FF5733").
     /// Supports 6-digit (RGB) and 8-digit (ARGB) hex strings.
     /// Returns nil if the string is not a valid hex color.
-    init?(hex: String) {
+    public init?(hex: String) {
         var hexString = hex.trimmingCharacters(in: .whitespacesAndNewlines)
         if hexString.hasPrefix("#") {
             hexString.removeFirst()

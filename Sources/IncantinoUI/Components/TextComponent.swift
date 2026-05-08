@@ -73,7 +73,7 @@ public struct TextComponent: IncantinoComponent {
 
 /// Resolve a color string to a SwiftUI Color.
 /// Supports theme token names and hex strings.
-func resolveColor(_ value: String?, theme: any ThemeReading) -> Color {
+public func resolveColor(_ value: String?, theme: any ThemeReading) -> Color {
     guard let value, !value.isEmpty else { return theme.textPrimary }
 
     // Theme token names.
