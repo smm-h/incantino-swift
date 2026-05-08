@@ -184,12 +184,12 @@ public struct ListComponent: IncantinoComponent {
     }
 
     /// Check if the data source is currently loading via scope metadata.
-    /// For data-driven mode, checks `$data.<name>.$loading`.
+    /// For data-driven mode, checks `$data.<name>.isLoading`.
     /// For static mode (no dataSource path), returns false.
     private func isLoading(dataSourcePath: String?) -> Bool {
         guard let path = dataSourcePath else { return false }
-        // dataSourcePath is e.g. "$data.products"; loading key is "$data.products.$loading".
-        let loadingKey = "\(path).$loading"
+        // dataSourcePath is e.g. "$data.products"; loading key is "$data.products.isLoading".
+        let loadingKey = "\(path).isLoading"
         return context.scope.resolve(loadingKey).isTruthy
     }
 }

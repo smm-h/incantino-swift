@@ -56,7 +56,8 @@ public final class ScreenDataLoader {
 
     /// Fetch all data sources and build a scope.
     /// Data source names (the dictionary keys) are used as keys under the `$data` namespace.
-    /// Also sets metadata keys like `$data.<name>.$loading`, `$data.<name>.$error`.
+    /// Also sets metadata keys: `$data.<name>.isLoading`, `$data.<name>.isLoaded`,
+    /// `$data.<name>.isEmpty`, `$data.<name>.hasError`.
     ///
     /// Sources are fetched concurrently by spawning individual tasks and
     /// collecting their results. Each task hops back to the main actor to
@@ -99,20 +100,29 @@ public final class ScreenDataLoader {
         switch state {
         case .loading:
             scope.set(dataKey, value: .empty)
-            scope.set("\(dataKey).$loading", value: .bool(true))
-            scope.set("\(dataKey).$error", value: .empty)
+            scope.set("\(dataKey).isLoading", value: .bool(true))
+            scope.set("\(dataKey).isLoaded", value: .bool(false))
+            scope.set("\(dataKey).isEmpty", value: .bool(false))
+            scope.set("\(dataKey).hasError", value: .bool(false))
         case .loaded(let value):
+            let empty = value.isNull || value == .array([])
             scope.set(dataKey, value: .json(value))
-            scope.set("\(dataKey).$loading", value: .bool(false))
-            scope.set("\(dataKey).$error", value: .empty)
+            scope.set("\(dataKey).isLoading", value: .bool(false))
+            scope.set("\(dataKey).isLoaded", value: .bool(true))
+            scope.set("\(dataKey).isEmpty", value: .bool(empty))
+            scope.set("\(dataKey).hasError", value: .bool(false))
         case .empty:
             scope.set(dataKey, value: .empty)
-            scope.set("\(dataKey).$loading", value: .bool(false))
-            scope.set("\(dataKey).$error", value: .empty)
+            scope.set("\(dataKey).isLoading", value: .bool(false))
+            scope.set("\(dataKey).isLoaded", value: .bool(false))
+            scope.set("\(dataKey).isEmpty", value: .bool(true))
+            scope.set("\(dataKey).hasError", value: .bool(false))
         case .error(let message):
-            scope.set(dataKey, value: .empty)
-            scope.set("\(dataKey).$loading", value: .bool(false))
-            scope.set("\(dataKey).$error", value: .text(message))
+            scope.set(dataKey, value: .text(message))
+            scope.set("\(dataKey).isLoading", value: .bool(false))
+            scope.set("\(dataKey).isLoaded", value: .bool(false))
+            scope.set("\(dataKey).isEmpty", value: .bool(false))
+            scope.set("\(dataKey).hasError", value: .bool(true))
         }
     }
 }
