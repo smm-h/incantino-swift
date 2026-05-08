@@ -180,14 +180,16 @@ public enum ConfigValidator {
 
         // Recurse into slots.
         if let slots = section.slots {
-            for (slotName, slotSection) in slots {
-                count += validateSection(
-                    slotSection,
-                    path: "\(path).slots.\(slotName)",
-                    vocabulary: vocabulary,
-                    screenIds: screenIds,
-                    issues: &issues
-                )
+            for (slotName, slotSections) in slots {
+                for (i, slotSection) in slotSections.enumerated() {
+                    count += validateSection(
+                        slotSection,
+                        path: "\(path).slots.\(slotName)[\(i)]",
+                        vocabulary: vocabulary,
+                        screenIds: screenIds,
+                        issues: &issues
+                    )
+                }
             }
         }
 
@@ -366,9 +368,9 @@ public enum ConfigValidator {
                 )
             }
             if let slots = section.slots {
-                for (slotName, slotSection) in slots {
+                for (slotName, slotSections) in slots {
                     collectExpressions(
-                        from: [slotSection],
+                        from: slotSections,
                         basePath: "\(sectionPath).slots.\(slotName)",
                         into: &result
                     )

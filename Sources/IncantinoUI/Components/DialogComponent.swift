@@ -46,7 +46,7 @@ public struct DialogComponent: IncantinoComponent {
                     }
 
                     // Content slot overrides message if provided.
-                    if let content = spec.slots?["content"],
+                    if let content = spec.slots?["content"]?.first,
                        let view = registry.resolve(content, context: context) {
                         view
                     } else if let message {
@@ -57,7 +57,7 @@ public struct DialogComponent: IncantinoComponent {
                     }
 
                     // Footer slot (action buttons).
-                    if let footer = spec.slots?["footer"],
+                    if let footer = spec.slots?["footer"]?.first,
                        let view = registry.resolve(footer, context: context) {
                         view
                     }

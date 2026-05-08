@@ -24,21 +24,21 @@ public struct RowComponent: IncantinoComponent {
 
         HStack(alignment: alignment, spacing: spacing) {
             // Leading slot (natural width).
-            if let leading = spec.slots?["leading"] {
+            if let leading = spec.slots?["leading"]?.first {
                 if let view = registry.resolve(leading, context: context) {
                     view.fixedSize(horizontal: true, vertical: false)
                 }
             }
 
             // Content slot (fills remaining space).
-            if let content = spec.slots?["content"] {
+            if let content = spec.slots?["content"]?.first {
                 if let view = registry.resolve(content, context: context) {
                     view.frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
 
             // Trailing slot (natural width).
-            if let trailing = spec.slots?["trailing"] {
+            if let trailing = spec.slots?["trailing"]?.first {
                 if let view = registry.resolve(trailing, context: context) {
                     view.fixedSize(horizontal: true, vertical: false)
                 }

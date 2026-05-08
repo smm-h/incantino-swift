@@ -94,7 +94,7 @@ public struct CardComponent: IncantinoComponent {
         VStack(alignment: .leading, spacing: 0) {
             slotView("content")
                 .padding(theme.spacingMD)
-            if spec.slots?["footer"] != nil {
+            if spec.slots?["footer"]?.isEmpty == false {
                 slotView("footer")
                     .padding(.horizontal, theme.spacingMD)
                     .padding(.bottom, theme.spacingSM)
@@ -106,7 +106,7 @@ public struct CardComponent: IncantinoComponent {
 
     @ViewBuilder
     private func slotView(_ name: String) -> some View {
-        if let slot = spec.slots?[name],
+        if let slot = spec.slots?[name]?.first,
            let view = registry.resolve(slot, context: context) {
             view
         }

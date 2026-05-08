@@ -51,13 +51,87 @@ public struct SectionSpec: Codable, Sendable {
     public let id: String
     public let component: String
     public let properties: JSONObject?
-    public let slots: [String: SectionSpec]?
+    /// Each slot maps to an array of SectionSpecs. The spec allows either a single
+    /// SectionSpec or an array per slot; the decoder normalizes singles to one-element arrays.
+    public let slots: [String: [SectionSpec]]?
     public let children: [SectionSpec]?
     public let visibility: String?
     public let binding: String?
     public let action: ActionSpec?
     public let validation: [ValidationRule]?
     public let animation: AnimationSpec?
+
+    private enum CodingKeys: String, CodingKey {
+        case id, component, properties, slots, children,
+             visibility, binding, action, validation, animation
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        component = try container.decode(String.self, forKey: .component)
+        properties = try container.decodeIfPresent(JSONObject.self, forKey: .properties)
+        children = try container.decodeIfPresent([SectionSpec].self, forKey: .children)
+        visibility = try container.decodeIfPresent(String.self, forKey: .visibility)
+        binding = try container.decodeIfPresent(String.self, forKey: .binding)
+        action = try container.decodeIfPresent(ActionSpec.self, forKey: .action)
+        validation = try container.decodeIfPresent([ValidationRule].self, forKey: .validation)
+        animation = try container.decodeIfPresent(AnimationSpec.self, forKey: .animation)
+
+        // Slots: each value is either a single SectionSpec or an array of SectionSpec.
+        // Normalize to [SectionSpec] so consumers always see arrays.
+        if container.contains(.slots) {
+            let rawSlots = try container.decode([String: OneOrMany].self, forKey: .slots)
+            var normalized: [String: [SectionSpec]] = [:]
+            for (key, value) in rawSlots {
+                switch value {
+                case .one(let spec): normalized[key] = [spec]
+                case .many(let specs): normalized[key] = specs
+                }
+            }
+            slots = normalized.isEmpty ? nil : normalized
+        } else {
+            slots = nil
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(component, forKey: .component)
+        try container.encodeIfPresent(properties, forKey: .properties)
+        try container.encodeIfPresent(children, forKey: .children)
+        try container.encodeIfPresent(visibility, forKey: .visibility)
+        try container.encodeIfPresent(binding, forKey: .binding)
+        try container.encodeIfPresent(action, forKey: .action)
+        try container.encodeIfPresent(validation, forKey: .validation)
+        try container.encodeIfPresent(animation, forKey: .animation)
+        try container.encodeIfPresent(slots, forKey: .slots)
+    }
+}
+
+/// Helper for decoding a value that may be a single T or an array of T.
+private enum OneOrMany: Codable, Sendable {
+    case one(SectionSpec)
+    case many([SectionSpec])
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let array = try? container.decode([SectionSpec].self) {
+            self = .many(array)
+        } else {
+            let single = try container.decode(SectionSpec.self)
+            self = .one(single)
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self {
+        case .one(let spec): try container.encode(spec)
+        case .many(let specs): try container.encode(specs)
+        }
+    }
 }
 
 // MARK: - ValidationRule
