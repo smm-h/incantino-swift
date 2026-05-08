@@ -173,10 +173,9 @@ public struct ScreenSpec: Codable, Sendable {
 
 public struct DataSourceSpec: Codable, Sendable {
     public let source: String
-    public let function: String?
-    public let table: String?
+    public let endpoint: String
     public let params: JSONObject?
-    public let single: Bool?
+    public let options: JSONObject?
 }
 
 // MARK: - CardSpec

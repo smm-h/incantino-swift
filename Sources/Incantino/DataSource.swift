@@ -18,11 +18,11 @@ public enum LoadState: Sendable {
 /// Protocol for resolving data sources by identifier.
 @MainActor
 public protocol DataSourceResolving {
-    /// Fetch data for the given source identifier.
-    func fetch(source: String) async -> LoadState
+    /// Fetch data for the given data source spec.
+    func fetch(spec: DataSourceSpec) async -> LoadState
 
-    /// Re-fetch data for the given source identifier.
-    func refresh(source: String) async -> LoadState
+    /// Re-fetch data for the given data source spec.
+    func refresh(spec: DataSourceSpec) async -> LoadState
 }
 
 // MARK: - NoOpDataSourceResolver
@@ -32,11 +32,11 @@ public protocol DataSourceResolving {
 public final class NoOpDataSourceResolver: DataSourceResolving {
     public init() {}
 
-    public func fetch(source: String) async -> LoadState {
+    public func fetch(spec: DataSourceSpec) async -> LoadState {
         .empty
     }
 
-    public func refresh(source: String) async -> LoadState {
+    public func refresh(spec: DataSourceSpec) async -> LoadState {
         .empty
     }
 }
@@ -55,33 +55,33 @@ public final class ScreenDataLoader {
     }
 
     /// Fetch all data sources and build a scope.
-    /// Source identifiers are used as keys under the `$data` namespace.
-    /// Also sets metadata keys like `$data.<source>.$loading`, `$data.<source>.$error`.
+    /// Data source names (the dictionary keys) are used as keys under the `$data` namespace.
+    /// Also sets metadata keys like `$data.<name>.$loading`, `$data.<name>.$error`.
     ///
     /// Sources are fetched concurrently by spawning individual tasks and
     /// collecting their results. Each task hops back to the main actor to
     /// call the resolver (which is @MainActor-isolated).
-    public func fetchAll(sources: [String], into scope: DictionaryScope) async {
+    public func fetchAll(sources: [String: DataSourceSpec], into scope: DictionaryScope) async {
         // Spawn one Task per source. Each Task inherits @MainActor isolation
         // because ScreenDataLoader is @MainActor, so the resolver call is safe.
         var tasks: [String: Task<LoadState, Never>] = [:]
-        for source in sources {
-            tasks[source] = Task {
-                await resolver.fetch(source: source)
+        for (name, spec) in sources {
+            tasks[name] = Task {
+                await resolver.fetch(spec: spec)
             }
         }
 
         // Collect results.
-        for (source, task) in tasks {
+        for (name, task) in tasks {
             let state = await task.value
-            applyState(state, forSource: source, into: scope)
+            applyState(state, forSource: name, into: scope)
         }
     }
 
     /// Refresh a single data source and update the scope.
-    public func refresh(source: String, into scope: DictionaryScope) async {
-        let state = await resolver.refresh(source: source)
-        applyState(state, forSource: source, into: scope)
+    public func refresh(name: String, spec: DataSourceSpec, into scope: DictionaryScope) async {
+        let state = await resolver.refresh(spec: spec)
+        applyState(state, forSource: name, into: scope)
     }
 
     /// Get the current load state for a source.
