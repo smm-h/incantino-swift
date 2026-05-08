@@ -217,16 +217,26 @@ private func coerceToDate(_ value: ScopeValue) -> Date? {
     }
 }
 
+// Cached ISO 8601 formatters (configured once, thread-safe for parsing).
+private let iso8601Formatter: ISO8601DateFormatter = {
+    let f = ISO8601DateFormatter()
+    f.formatOptions = [.withInternetDateTime]
+    return f
+}()
+
+private let iso8601FractionalFormatter: ISO8601DateFormatter = {
+    let f = ISO8601DateFormatter()
+    f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+    return f
+}()
+
 /// Parse an ISO 8601 date string. Returns nil if unparseable.
 private func parseISO8601(_ string: String) -> Date? {
-    let formatter = ISO8601DateFormatter()
-    formatter.formatOptions = [.withInternetDateTime]
-    if let date = formatter.date(from: string) {
+    if let date = iso8601Formatter.date(from: string) {
         return date
     }
     // Try with fractional seconds.
-    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-    return formatter.date(from: string)
+    return iso8601FractionalFormatter.date(from: string)
 }
 
 /// Convert a JSONValue element to a string for join/display.
@@ -281,16 +291,32 @@ private func applyAbs(_ value: ScopeValue) -> ScopeValue {
     return .number(Swift.abs(n))
 }
 
+// Cached currency formatter keyed by currency code.
+// Using NSCache for thread-safe lazy caching per currency code.
+private let currencyFormatterCache: NSCache<NSString, NumberFormatter> = {
+    let cache = NSCache<NSString, NumberFormatter>()
+    cache.countLimit = 20
+    return cache
+}()
+
+private func currencyFormatter(code: String) -> NumberFormatter {
+    let key = code as NSString
+    if let cached = currencyFormatterCache.object(forKey: key) {
+        return cached
+    }
+    let f = NumberFormatter()
+    f.numberStyle = .currency
+    f.currencyCode = code
+    f.locale = Locale(identifier: "en_US")
+    currencyFormatterCache.setObject(f, forKey: key)
+    return f
+}
+
 private func applyCurrency(_ value: ScopeValue, arg: FormatterArgument?) -> ScopeValue {
     guard let arg = arg, case .string(let code) = arg else { return value }
     guard let n = coerceToNumber(value) else { return value }
 
-    let formatter = NumberFormatter()
-    formatter.numberStyle = .currency
-    formatter.currencyCode = code
-    formatter.locale = Locale(identifier: "en_US")
-
-    if let result = formatter.string(from: NSNumber(value: n)) {
+    if let result = currencyFormatter(code: code).string(from: NSNumber(value: n)) {
         return .text(result)
     }
     return value
@@ -406,34 +432,47 @@ private func applyTrim(_ value: ScopeValue) -> ScopeValue {
 private let dateFormattingLocale = Locale(identifier: "en_US")
 private let dateFormattingTimeZone = TimeZone(identifier: "UTC")!
 
+// Cached DateFormatters (configured once, thread-safe for formatting).
+private let dateMediumFormatter: DateFormatter = {
+    let f = DateFormatter()
+    f.dateStyle = .medium
+    f.timeStyle = .none
+    f.locale = dateFormattingLocale
+    f.timeZone = dateFormattingTimeZone
+    return f
+}()
+
+private let timeShortFormatter: DateFormatter = {
+    let f = DateFormatter()
+    f.dateStyle = .none
+    f.timeStyle = .short
+    f.locale = dateFormattingLocale
+    f.timeZone = dateFormattingTimeZone
+    return f
+}()
+
+private let dateTimeMediumShortFormatter: DateFormatter = {
+    let f = DateFormatter()
+    f.dateStyle = .medium
+    f.timeStyle = .short
+    f.locale = dateFormattingLocale
+    f.timeZone = dateFormattingTimeZone
+    return f
+}()
+
 private func applyDate(_ value: ScopeValue) -> ScopeValue {
     guard let date = coerceToDate(value) else { return value }
-    let formatter = DateFormatter()
-    formatter.dateStyle = .medium
-    formatter.timeStyle = .none
-    formatter.locale = dateFormattingLocale
-    formatter.timeZone = dateFormattingTimeZone
-    return .text(formatter.string(from: date))
+    return .text(dateMediumFormatter.string(from: date))
 }
 
 private func applyTime(_ value: ScopeValue) -> ScopeValue {
     guard let date = coerceToDate(value) else { return value }
-    let formatter = DateFormatter()
-    formatter.dateStyle = .none
-    formatter.timeStyle = .short
-    formatter.locale = dateFormattingLocale
-    formatter.timeZone = dateFormattingTimeZone
-    return .text(formatter.string(from: date))
+    return .text(timeShortFormatter.string(from: date))
 }
 
 private func applyDateTime(_ value: ScopeValue) -> ScopeValue {
     guard let date = coerceToDate(value) else { return value }
-    let formatter = DateFormatter()
-    formatter.dateStyle = .medium
-    formatter.timeStyle = .short
-    formatter.locale = dateFormattingLocale
-    formatter.timeZone = dateFormattingTimeZone
-    return .text(formatter.string(from: date))
+    return .text(dateTimeMediumShortFormatter.string(from: date))
 }
 
 private func applyRelativeTime(_ value: ScopeValue) -> ScopeValue {
@@ -469,13 +508,17 @@ private func applyRelativeTime(_ value: ScopeValue) -> ScopeValue {
     #endif
 }
 
+private let yearFormatter: DateFormatter = {
+    let f = DateFormatter()
+    f.dateFormat = "yyyy"
+    f.locale = dateFormattingLocale
+    f.timeZone = dateFormattingTimeZone
+    return f
+}()
+
 private func applyYear(_ value: ScopeValue) -> ScopeValue {
     guard let date = coerceToDate(value) else { return value }
-    let formatter = DateFormatter()
-    formatter.dateFormat = "yyyy"
-    formatter.locale = dateFormattingLocale
-    formatter.timeZone = dateFormattingTimeZone
-    return .text(formatter.string(from: date))
+    return .text(yearFormatter.string(from: date))
 }
 
 // MARK: - Collection formatters
