@@ -1,5 +1,7 @@
 // ListComponent.swift
 // Vertical list with loading and empty state support.
+// Supports two modes: static children (no dataSource) and data-driven
+// iteration (with dataSource) where a template slot is rendered per item.
 
 import SwiftUI
 
@@ -19,14 +21,24 @@ public struct ListComponent: IncantinoComponent {
 
     public var body: some View {
         let p = spec.properties ?? [:]
+
+        if let dataSourcePath = p.string(forKey: "dataSource") {
+            dataDrivenBody(dataSourcePath: dataSourcePath, p: p)
+        } else {
+            staticBody(p: p)
+        }
+    }
+
+    // MARK: - Static children mode (no dataSource)
+
+    @ViewBuilder
+    private func staticBody(p: JSONObject) -> some View {
         let children = (spec.children ?? []).visible(scope: context.scope)
         let loadingCount = p.int(forKey: "loadingCount") ?? 3
 
         LazyVStack(spacing: 0) {
             if children.isEmpty {
-                // Check if we're in a loading state (no children yet).
-                // If there's a data source loading, show skeleton placeholders.
-                if loadingCount > 0 && isLoading() {
+                if loadingCount > 0 && isLoading(dataSourcePath: nil) {
                     ForEach(0..<loadingCount, id: \.self) { _ in
                         skeletonRow
                     }
@@ -41,6 +53,79 @@ public struct ListComponent: IncantinoComponent {
                 }
             }
         }
+    }
+
+    // MARK: - Data-driven mode (with dataSource)
+
+    @ViewBuilder
+    private func dataDrivenBody(dataSourcePath: String, p: JSONObject) -> some View {
+        let loadingCount = p.int(forKey: "loadingCount") ?? 3
+        let itemVariable = p.string(forKey: "itemVariable") ?? "item"
+        let templateSpec = spec.slots?["template"]?.first
+
+        LazyVStack(spacing: 0) {
+            if isLoading(dataSourcePath: dataSourcePath) {
+                // Loading: show skeleton placeholders.
+                ForEach(0..<loadingCount, id: \.self) { _ in
+                    skeletonRow
+                }
+            } else {
+                let items = resolveDataSource(path: dataSourcePath)
+                if items.isEmpty {
+                    emptyState(p)
+                } else if let templateSpec {
+                    ForEach(Array(items.enumerated()), id: \.offset) { index, jsonItem in
+                        let itemScope = makeItemScope(
+                            item: jsonItem,
+                            index: index,
+                            lastIndex: items.count - 1,
+                            itemVariable: itemVariable
+                        )
+                        let itemContext = SDUIContext(
+                            scope: itemScope,
+                            dispatch: context.dispatch,
+                            theme: context.theme
+                        )
+                        if let view = registry.resolve(templateSpec, context: itemContext) {
+                            view
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Data source resolution
+
+    /// Resolve the dataSource path from scope and extract a filtered array
+    /// of non-null JSON values.
+    private func resolveDataSource(path: String) -> [JSONValue] {
+        let resolved = context.scope.resolve(path)
+        guard case .json(let jsonVal) = resolved,
+              case .array(let arr) = jsonVal else {
+            return []
+        }
+        // Filter out null entries.
+        return arr.filter { !$0.isNull }
+    }
+
+    /// Build a DictionaryScope for a single item with iteration metadata.
+    private func makeItemScope(
+        item: JSONValue,
+        index: Int,
+        lastIndex: Int,
+        itemVariable: String
+    ) -> DictionaryScope {
+        let scope = DictionaryScope(
+            values: [
+                itemVariable: .json(item),
+                "\(itemVariable).$index": .json(.int(index)),
+                "\(itemVariable).$isFirst": .json(.bool(index == 0)),
+                "\(itemVariable).$isLast": .json(.bool(index == lastIndex)),
+            ],
+            parent: context.scope
+        )
+        return scope
     }
 
     // MARK: - Empty state
@@ -97,9 +182,13 @@ public struct ListComponent: IncantinoComponent {
         .accessibilityHidden(true)
     }
 
-    /// Heuristic: if children are empty but we just rendered, might be loading.
-    /// Actual loading detection uses scope metadata.
-    private func isLoading() -> Bool {
-        false
+    /// Check if the data source is currently loading via scope metadata.
+    /// For data-driven mode, checks `$data.<name>.$loading`.
+    /// For static mode (no dataSource path), returns false.
+    private func isLoading(dataSourcePath: String?) -> Bool {
+        guard let path = dataSourcePath else { return false }
+        // dataSourcePath is e.g. "$data.products"; loading key is "$data.products.$loading".
+        let loadingKey = "\(path).$loading"
+        return context.scope.resolve(loadingKey).isTruthy
     }
 }
