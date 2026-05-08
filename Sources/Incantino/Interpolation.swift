@@ -32,18 +32,34 @@ public enum TextInterpolator {
         for match in matches.reversed() {
             let fullMatchRange = match.range
             let innerRange = match.range(at: 1)
-            let rawPath = nsTemplate.substring(with: innerRange)
-            let trimmed = rawPath.trimmingCharacters(in: .whitespaces)
+            let rawContent = nsTemplate.substring(with: innerRange)
+            let trimmedContent = rawContent.trimmingCharacters(in: .whitespaces)
 
             // Empty braces: leave as-is.
-            if trimmed.isEmpty {
+            if trimmedContent.isEmpty {
                 continue
             }
 
-            let value = scope.resolve(trimmed)
+            // Parse pipe expression: path + optional formatter chain.
+            let (path, formatters) = parsePipeExpression(rawContent)
 
-            // Unresolved: leave original token verbatim.
+            if path.isEmpty {
+                continue
+            }
+
+            var value = scope.resolve(path)
+
+            // Apply formatter chain (if any).
+            if !formatters.isEmpty {
+                value = applyFormatters(formatters, to: value)
+            }
+
+            // Unresolved after formatters: leave original token verbatim.
+            // json(null) is treated as empty for display purposes.
             if case .empty = value {
+                continue
+            }
+            if case .json(.null) = value {
                 continue
             }
 
