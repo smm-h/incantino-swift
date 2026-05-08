@@ -13,11 +13,27 @@ public struct FlowStepConfig: Codable, Sendable {
     public let terminal: Bool?
     /// Data source identifier for pre-filling form values.
     public let prefill: String?
+    /// Expression evaluated on advance from this step; its string value selects a branch target.
+    public let branchOn: String?
+    /// Maps expression result string to target step ID. Used with `branchOn`.
+    public let branches: [String: String]?
+    /// References another flow by ID. Signals that a sub-flow should be launched.
+    public let subFlow: String?
 
-    public init(skipIf: String? = nil, terminal: Bool? = nil, prefill: String? = nil) {
+    public init(
+        skipIf: String? = nil,
+        terminal: Bool? = nil,
+        prefill: String? = nil,
+        branchOn: String? = nil,
+        branches: [String: String]? = nil,
+        subFlow: String? = nil
+    ) {
         self.skipIf = skipIf
         self.terminal = terminal
         self.prefill = prefill
+        self.branchOn = branchOn
+        self.branches = branches
+        self.subFlow = subFlow
     }
 }
 
@@ -129,6 +145,31 @@ public final class FlowRunner: @unchecked Sendable {
         // Push current to history.
         history.append(currentIndex)
 
+        // Branch check: if the departing step has branchOn, evaluate and jump.
+        if let branchExpr = stepConfig[currentStep]?.branchOn,
+           let branchMap = stepConfig[currentStep]?.branches {
+            let branchValue = resolveToString(expression: branchExpr, scope: scope)
+            if let targetStepId = branchMap[branchValue],
+               let targetIndex = steps.firstIndex(of: targetStepId) {
+                // Found a branch target. Check skipIf on target, scan forward from there.
+                var i = targetIndex
+                while i < steps.count {
+                    let stepId = steps[i]
+                    let cfg = stepConfig[stepId]
+                    if let skipIf = cfg?.skipIf, evaluate(expression: skipIf, scope: scope) {
+                        i += 1
+                        continue
+                    }
+                    currentIndex = i
+                    return steps[i]
+                }
+                // All steps from branch target onward are skipped.
+                _isComplete = true
+                return nil
+            }
+            // No match in branches map: fall through to sequential scan.
+        }
+
         // Scan forward from next index.
         var i = currentIndex + 1
         while i < steps.count {
@@ -160,6 +201,29 @@ public final class FlowRunner: @unchecked Sendable {
         }
 
         currentIndex = previousIndex
+        _isComplete = false
+        return steps[currentIndex]
+    }
+
+    /// Jump to a specific step by screen ID, regardless of position.
+    /// Does NOT evaluate skipIf on the target. Does NOT check terminal or branchOn.
+    /// Returns the target screen ID, or nil if the step is not found or is the current step.
+    @discardableResult
+    public func goTo(stepId: String, scope: any ScopeReading) -> String? {
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard let targetIndex = steps.firstIndex(of: stepId) else {
+            return nil
+        }
+
+        // goTo to current step is a no-op.
+        if targetIndex == currentIndex {
+            return steps[currentIndex]
+        }
+
+        history.append(currentIndex)
+        currentIndex = targetIndex
         _isComplete = false
         return steps[currentIndex]
     }
@@ -196,6 +260,14 @@ public final class FlowRunner: @unchecked Sendable {
     }
 
     // MARK: - Internal
+
+    /// Resolve a branchOn expression to its string value.
+    /// Uses the expression tokenizer/parser to resolve a path against the scope,
+    /// then coerces to a string. Returns empty string if unresolvable.
+    private func resolveToString(expression: String, scope: any ScopeReading) -> String {
+        let value = scope.resolve(expression)
+        return value.stringValue ?? ""
+    }
 
     /// Skip forward past steps whose skipIf evaluates to true.
     /// Must be called under lock.
