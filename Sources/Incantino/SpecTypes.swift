@@ -206,6 +206,33 @@ public enum ScopeSource: String, Codable, Sendable {
     case config, auth, form, runtime
 }
 
+// MARK: - Implicit binding
+
+/// Component types that participate in implicit form binding.
+/// When a section uses one of these components and omits the `binding` field,
+/// the engine generates `form.<section.id>` as the effective binding path.
+private let bindableComponents: Set<String> = [
+    "input", "select", "toggle", "checkbox", "slider"
+]
+
+extension SectionSpec {
+    /// Resolved binding path, applying implicit binding rules:
+    /// 1. If `binding` is present and non-empty, use it verbatim.
+    /// 2. If `binding` is nil and the component is bindable, generate `form.<id>`.
+    /// 3. If `binding` is an empty string, binding is disabled (returns nil).
+    public var effectiveBinding: String? {
+        if let binding {
+            // Explicit binding: use verbatim if non-empty, nil if empty (opt-out).
+            return binding.isEmpty ? nil : binding
+        }
+        // No explicit binding: auto-bind if the component type is bindable.
+        if bindableComponents.contains(component) {
+            return "form.\(id)"
+        }
+        return nil
+    }
+}
+
 // MARK: - Visibility filtering
 
 extension Array where Element == SectionSpec {

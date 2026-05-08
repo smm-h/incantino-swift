@@ -46,7 +46,7 @@ public struct InputComponent: IncantinoComponent {
                 .accessibilityLabel(label ?? placeholder)
 
             // Show validation error if present.
-            if let binding = spec.binding,
+            if let binding = spec.effectiveBinding,
                let formScope = context.scope as? FormScope,
                let error = formScope.errors[binding] {
                 Text(error)
@@ -97,7 +97,7 @@ public struct InputComponent: IncantinoComponent {
     // MARK: - Scope binding
 
     private func loadInitialValue() {
-        guard let binding = spec.binding else { return }
+        guard let binding = spec.effectiveBinding else { return }
         let current = context.scope.resolve(binding)
         if let str = current.stringValue {
             text = str
@@ -110,7 +110,7 @@ public struct InputComponent: IncantinoComponent {
     }
 
     private func writeToScope(_ value: String) {
-        guard let binding = spec.binding else { return }
+        guard let binding = spec.effectiveBinding else { return }
         if let scope = context.scope as? FormScope {
             scope.set(binding, value: .text(value))
         } else if let scope = context.scope as? DictionaryScope {

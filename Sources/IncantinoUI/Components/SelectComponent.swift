@@ -122,7 +122,7 @@ public struct SelectComponent: IncantinoComponent {
     // MARK: - Scope binding
 
     private func loadInitialSelection() {
-        guard let binding = spec.binding else { return }
+        guard let binding = spec.effectiveBinding else { return }
         let value = context.scope.resolve(binding)
         switch value {
         case .text(let s) where !s.isEmpty:
@@ -135,7 +135,7 @@ public struct SelectComponent: IncantinoComponent {
     }
 
     private func writeToScope() {
-        guard let binding = spec.binding else { return }
+        guard let binding = spec.effectiveBinding else { return }
         let p = spec.properties ?? [:]
         let mode = p.string(forKey: "mode") ?? "single"
 

@@ -46,14 +46,14 @@ public struct SliderComponent: IncantinoComponent {
     }
 
     private func loadInitialValue() {
-        guard let binding = spec.binding else { return }
+        guard let binding = spec.effectiveBinding else { return }
         if let val = context.scope.resolve(binding).doubleValue {
             value = val
         }
     }
 
     private func writeToScope(_ val: Double) {
-        guard let binding = spec.binding else { return }
+        guard let binding = spec.effectiveBinding else { return }
         if let scope = context.scope as? FormScope {
             scope.set(binding, value: .number(val))
         } else if let scope = context.scope as? DictionaryScope {

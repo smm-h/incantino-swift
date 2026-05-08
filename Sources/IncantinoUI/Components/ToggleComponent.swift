@@ -31,14 +31,14 @@ public struct ToggleComponent: IncantinoComponent {
     }
 
     private func loadInitialValue() {
-        guard let binding = spec.binding else { return }
+        guard let binding = spec.effectiveBinding else { return }
         if let val = context.scope.resolve(binding).boolValue {
             isOn = val
         }
     }
 
     private func writeToScope(_ value: Bool) {
-        guard let binding = spec.binding else { return }
+        guard let binding = spec.effectiveBinding else { return }
         if let scope = context.scope as? FormScope {
             scope.set(binding, value: .bool(value))
         } else if let scope = context.scope as? DictionaryScope {
