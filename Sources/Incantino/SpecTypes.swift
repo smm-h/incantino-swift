@@ -61,6 +61,46 @@ public struct ActionSpec: Codable, Sendable {
     }
 }
 
+// MARK: - ActionSpec navigate helpers
+
+extension ActionSpec {
+    /// The navigation target screen ID, extracted from `params["target"]`.
+    /// Returns nil if this is not a navigate action or target is missing.
+    public var navigateTarget: String? {
+        params?.string(forKey: "target")
+    }
+
+    /// Route parameters for a navigate action, extracted from the nested `params["params"]` object.
+    /// Returns key-value pairs with the `route.` prefix stripped -- callers inject these into
+    /// the target screen's scope as `route.<key>`.
+    /// Returns an empty dictionary if no route params are present.
+    public var routeParams: JSONObject {
+        guard let nested = params?.object(forKey: "params") else { return [:] }
+        return nested
+    }
+
+    /// Route parameters converted to ScopeValues for direct injection into a DictionaryScope.
+    /// Each entry maps `"route.<key>"` to the corresponding ScopeValue.
+    /// Strings become `.text`, numbers become `.number`, booleans become `.bool`,
+    /// complex values become `.json`.
+    public var routeScopeValues: [String: ScopeValue] {
+        var result: [String: ScopeValue] = [:]
+        for (key, jsonValue) in routeParams {
+            let scopeValue: ScopeValue
+            switch jsonValue {
+            case .string(let s): scopeValue = .text(s)
+            case .int(let i): scopeValue = .number(Double(i))
+            case .double(let d): scopeValue = .number(d)
+            case .bool(let b): scopeValue = .bool(b)
+            case .null: scopeValue = .empty
+            case .array, .object: scopeValue = .json(jsonValue)
+            }
+            result["route.\(key)"] = scopeValue
+        }
+        return result
+    }
+}
+
 // MARK: - SectionSpec
 
 /// A section in a screen -- the recursive building block of UI layout.
