@@ -6,10 +6,11 @@ import Foundation
 // MARK: - ActionDispatching
 
 /// Protocol for dispatching SDUI actions through the pipeline.
+/// Callers pass the full ActionSpec; the dispatcher decomposes it internally.
 @MainActor
 public protocol ActionDispatching: AnyObject {
-    /// Dispatch an action with parameters and scope context.
-    func dispatch(action: String, params: JSONObject, scope: any ScopeReading) async
+    /// Dispatch an ActionSpec through the full pipeline (guard, confirm, haptic, handler, chaining).
+    func dispatch(_ spec: ActionSpec, scope: any ScopeReading) async
 
     /// Register a handler for an action type.
     func register(action: String, handler: any ActionHandling)
@@ -45,7 +46,7 @@ public protocol ActionMiddleware {
 public final class NoOpDispatcher: ActionDispatching {
     public init() {}
 
-    public func dispatch(action: String, params: JSONObject, scope: any ScopeReading) async {
+    public func dispatch(_ spec: ActionSpec, scope: any ScopeReading) async {
         // No-op.
     }
 

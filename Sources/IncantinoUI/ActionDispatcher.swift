@@ -35,13 +35,7 @@ public final class ActionDispatcher: ActionDispatching {
 
     // MARK: - Dispatch
 
-    public func dispatch(action: String, params: JSONObject, scope: any ScopeReading) async {
-        // Run through middleware chain, then the actual handler.
-        await runMiddlewareChain(index: 0, action: action, params: params, scope: scope)
-    }
-
-    /// Dispatch a full ActionSpec, processing guard, confirm, haptic, and chaining.
-    public func dispatchSpec(_ spec: ActionSpec, scope: any ScopeReading) async {
+    public func dispatch(_ spec: ActionSpec, scope: any ScopeReading) async {
         // 1. Guard evaluation: if guard expression is false, skip.
         if let guardExpr = spec.guard {
             if !evaluate(expression: guardExpr, scope: scope) {
@@ -61,43 +55,52 @@ public final class ActionDispatcher: ActionDispatching {
             triggerHaptic(haptic)
         }
 
-        // 4. Dispatch the action.
+        // 4. Dispatch through middleware chain, then handler.
+        let action = spec.action
         let params = spec.params ?? [:]
-        do {
-            try await executeHandler(action: spec.action, params: params, scope: scope)
+        let handlerError = await runMiddlewareChain(
+            index: 0, action: action, params: params, scope: scope
+        )
 
-            // 5. On success chain.
-            if let onSuccess = spec.onSuccess {
-                await dispatchSpec(onSuccess.value, scope: scope)
-            }
-        } catch {
-            logger.error("Action \(spec.action) failed: \(error.localizedDescription)")
+        if let handlerError {
+            logger.error("Action \(action) failed: \(handlerError.localizedDescription)")
 
-            // 6. On error chain.
+            // 5. On error chain.
             if let onError = spec.onError {
-                await dispatchSpec(onError.value, scope: scope)
+                await dispatch(onError.value, scope: scope)
+            }
+        } else {
+            // 6. On success chain.
+            if let onSuccess = spec.onSuccess {
+                await dispatch(onSuccess.value, scope: scope)
             }
         }
     }
 
     // MARK: - Internal
 
+    /// Run through middleware chain, then the handler. Returns the handler error (if any)
+    /// so the caller can decide between onSuccess and onError chaining.
     private func runMiddlewareChain(
         index: Int, action: String, params: JSONObject, scope: any ScopeReading
-    ) async {
+    ) async -> (any Error)? {
         if index < middleware.count {
+            // Capture error from downstream chain via nonisolated(unsafe) box.
+            nonisolated(unsafe) var captured: (any Error)?
             let mw = middleware[index]
             await mw.intercept(action: action, params: params, scope: scope) { [self] in
-                await self.runMiddlewareChain(
+                captured = await self.runMiddlewareChain(
                     index: index + 1, action: action, params: params, scope: scope
                 )
             }
+            return captured
         } else {
             // End of middleware chain: dispatch to handler.
             do {
                 try await executeHandler(action: action, params: params, scope: scope)
+                return nil
             } catch {
-                logger.error("Handler for \(action) threw: \(error.localizedDescription)")
+                return error
             }
         }
     }
