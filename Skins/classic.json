@@ -11,7 +11,17 @@
     "separator": { "light": "#E5E7EB", "dark": "#374151" },
     "error": { "light": "#EF4444", "dark": "#F87171" },
     "success": { "light": "#22C55E", "dark": "#4ADE80" },
-    "transit": { "light": "#F59E0B", "dark": "#FBBF24" }
+    "transit": { "light": "#F59E0B", "dark": "#FBBF24" },
+    "textTertiary": { "light": "#9CA3AF", "dark": "#6B7280" },
+    "warning": { "light": "#F59E0B", "dark": "#FBBF24" },
+    "cardFill": { "light": "#F5F5F5", "dark": "#2A2A2A" },
+    "badgeBackground": { "light": "#EF4444", "dark": "#DC2626" },
+    "badgeText": { "light": "#FFFFFF", "dark": "#FFFFFF" },
+    "brandGradientStart": { "light": "#007AFF", "dark": "#0A84FF" },
+    "brandGradientEnd": { "light": "#5856D6", "dark": "#5E5CE6" },
+    "completedStep": { "light": "#22C55E", "dark": "#16A34A" },
+    "overlayButtonBackground": { "light": "#00000080", "dark": "#FFFFFF80" },
+    "borderColor": { "light": "#E5E7EB", "dark": "#374151" }
   },
   "spacing": {
     "xs": 4,
@@ -33,7 +43,11 @@
   "cornerRadii": {
     "chip": 20,
     "button": 12,
-    "card": 16
+    "card": 16,
+    "cardSmall": 8
+  },
+  "borders": {
+    "width": 1
   },
   "animation": {
     "fast": 0.15,
