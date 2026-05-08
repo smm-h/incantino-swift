@@ -15,10 +15,20 @@ public final class DefaultTheme: ThemeReading, Observable {
     public var accentSecondary: Color { .purple }
     public var textPrimary: Color { Color(.label) }
     public var textSecondary: Color { Color(.secondaryLabel) }
+    public var textTertiary: Color { .secondary }
     public var separator: Color { Color(.separator) }
     public var error: Color { .red }
     public var success: Color { .green }
     public var transit: Color { .orange }
+    public var warning: Color { .orange }
+    public var cardFill: Color { Color(.secondarySystemBackground) }
+    public var badgeBackground: Color { .red }
+    public var badgeText: Color { .white }
+    public var brandGradientStart: Color { .accentColor }
+    public var brandGradientEnd: Color { .purple }
+    public var completedStep: Color { .green }
+    public var overlayButtonBackground: Color { Color.black.opacity(0.8) }
+    public var borderColor: Color { Color(.separator) }
 
     // MARK: - Spacing
 
@@ -48,6 +58,11 @@ public final class DefaultTheme: ThemeReading, Observable {
     public var chipCornerRadius: CGFloat { 20 }
     public var buttonCornerRadius: CGFloat { 12 }
     public var cardCornerRadius: CGFloat { 16 }
+    public var cardSmallCornerRadius: CGFloat { 8 }
+
+    // MARK: - Borders
+
+    public var borderWidth: CGFloat { 1 }
 
     // MARK: - Animation Durations
 

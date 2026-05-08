@@ -22,7 +22,7 @@ public final class SkinTheme: ThemeReading, Observable {
         self.init(skin: skin)
     }
 
-    // MARK: - Colors (11)
+    // MARK: - Colors (21)
 
     public var background: Color { adaptiveColor(from: skin.colors.background) }
     public var surface: Color { adaptiveColor(from: skin.colors.surface) }
@@ -31,10 +31,20 @@ public final class SkinTheme: ThemeReading, Observable {
     public var accentSecondary: Color { adaptiveColor(from: skin.colors.accentSecondary) }
     public var textPrimary: Color { adaptiveColor(from: skin.colors.textPrimary) }
     public var textSecondary: Color { adaptiveColor(from: skin.colors.textSecondary) }
+    public var textTertiary: Color { optionalAdaptiveColor(from: skin.colors.textTertiary) ?? .secondary }
     public var separator: Color { adaptiveColor(from: skin.colors.separator) }
     public var error: Color { adaptiveColor(from: skin.colors.error) }
     public var success: Color { adaptiveColor(from: skin.colors.success) }
     public var transit: Color { adaptiveColor(from: skin.colors.transit) }
+    public var warning: Color { optionalAdaptiveColor(from: skin.colors.warning) ?? .orange }
+    public var cardFill: Color { optionalAdaptiveColor(from: skin.colors.cardFill) ?? surface }
+    public var badgeBackground: Color { optionalAdaptiveColor(from: skin.colors.badgeBackground) ?? .red }
+    public var badgeText: Color { optionalAdaptiveColor(from: skin.colors.badgeText) ?? .white }
+    public var brandGradientStart: Color { optionalAdaptiveColor(from: skin.colors.brandGradientStart) ?? accent }
+    public var brandGradientEnd: Color { optionalAdaptiveColor(from: skin.colors.brandGradientEnd) ?? accentSecondary }
+    public var completedStep: Color { optionalAdaptiveColor(from: skin.colors.completedStep) ?? .green }
+    public var overlayButtonBackground: Color { optionalAdaptiveColor(from: skin.colors.overlayButtonBackground) ?? Color.black.opacity(0.8) }
+    public var borderColor: Color { optionalAdaptiveColor(from: skin.colors.borderColor) ?? separator }
 
     // MARK: - Spacing (6)
 
@@ -56,11 +66,16 @@ public final class SkinTheme: ThemeReading, Observable {
         return .system(size: CGFloat(def.size)).weight(weight)
     }
 
-    // MARK: - Corner Radii (3)
+    // MARK: - Corner Radii (4)
 
     public var chipCornerRadius: CGFloat { CGFloat(skin.cornerRadii.chip) }
     public var buttonCornerRadius: CGFloat { CGFloat(skin.cornerRadii.button) }
     public var cardCornerRadius: CGFloat { CGFloat(skin.cornerRadii.card) }
+    public var cardSmallCornerRadius: CGFloat { skin.cornerRadii.cardSmall.map { CGFloat($0) } ?? 8 }
+
+    // MARK: - Borders (1)
+
+    public var borderWidth: CGFloat { skin.borders.map { CGFloat($0.width) } ?? 1 }
 
     // MARK: - Animation Durations (3)
 
@@ -69,6 +84,13 @@ public final class SkinTheme: ThemeReading, Observable {
     public var animationSlow: Double { skin.animation.slow }
 
     // MARK: - Private Helpers
+
+    /// Like `adaptiveColor` but for optional ColorPair fields.
+    /// Returns nil when the skin doesn't define the token.
+    private func optionalAdaptiveColor(from pair: SkinDefinition.ColorPair?) -> Color? {
+        guard let pair else { return nil }
+        return adaptiveColor(from: pair)
+    }
 
     /// Creates a Color that dynamically resolves to the correct hex value
     /// based on the current appearance (light/dark mode).

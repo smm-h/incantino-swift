@@ -22,7 +22,7 @@ public struct SkinDefinition: Codable, Sendable {
         }
     }
 
-    // MARK: - Colors (11)
+    // MARK: - Colors (21)
 
     public let colors: Colors
 
@@ -34,10 +34,20 @@ public struct SkinDefinition: Codable, Sendable {
         public let accentSecondary: ColorPair
         public let textPrimary: ColorPair
         public let textSecondary: ColorPair
+        public let textTertiary: ColorPair?
         public let separator: ColorPair
         public let error: ColorPair
         public let success: ColorPair
         public let transit: ColorPair
+        public let warning: ColorPair?
+        public let cardFill: ColorPair?
+        public let badgeBackground: ColorPair?
+        public let badgeText: ColorPair?
+        public let brandGradientStart: ColorPair?
+        public let brandGradientEnd: ColorPair?
+        public let completedStep: ColorPair?
+        public let overlayButtonBackground: ColorPair?
+        public let borderColor: ColorPair?
     }
 
     // MARK: - Spacing (6)
@@ -82,7 +92,7 @@ public struct SkinDefinition: Codable, Sendable {
         public let price: FontDef
     }
 
-    // MARK: - Corner Radii (3)
+    // MARK: - Corner Radii (4)
 
     public let cornerRadii: CornerRadii
 
@@ -90,6 +100,15 @@ public struct SkinDefinition: Codable, Sendable {
         public let chip: Double
         public let button: Double
         public let card: Double
+        public let cardSmall: Double?
+    }
+
+    // MARK: - Borders (1)
+
+    public let borders: Borders?
+
+    public struct Borders: Codable, Sendable {
+        public let width: Double
     }
 
     // MARK: - Animation Durations (3)

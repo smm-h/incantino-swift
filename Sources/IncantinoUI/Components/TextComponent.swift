@@ -85,10 +85,20 @@ public func resolveColor(_ value: String?, theme: any ThemeReading) -> Color {
     case "accentSecondary": return theme.accentSecondary
     case "textPrimary": return theme.textPrimary
     case "textSecondary": return theme.textSecondary
+    case "textTertiary": return theme.textTertiary
     case "separator": return theme.separator
     case "error": return theme.error
     case "success": return theme.success
     case "transit": return theme.transit
+    case "warning": return theme.warning
+    case "cardFill": return theme.cardFill
+    case "badgeBackground": return theme.badgeBackground
+    case "badgeText": return theme.badgeText
+    case "brandGradientStart": return theme.brandGradientStart
+    case "brandGradientEnd": return theme.brandGradientEnd
+    case "completedStep": return theme.completedStep
+    case "overlayButtonBackground": return theme.overlayButtonBackground
+    case "borderColor": return theme.borderColor
     default: break
     }
 
