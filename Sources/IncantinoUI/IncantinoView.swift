@@ -58,7 +58,8 @@ struct IncantinoContent: View {
                 let context = SDUIContext(
                     scope: scope,
                     dispatch: NoOpDispatcher(),
-                    theme: theme
+                    theme: theme,
+                    screenActions: screen.actions ?? [:]
                 )
                 ScreenRenderer(screen: screen, context: context)
             } else {

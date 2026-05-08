@@ -17,6 +17,10 @@ public final class ActionDispatcher: ActionDispatching {
     private var handlers: [String: any ActionHandling] = [:]
     private var middleware: [any ActionMiddleware] = []
 
+    /// Named action definitions from the current screen's `actions` map.
+    /// Set by the rendering layer when a screen is loaded.
+    public var screenActions: [String: NamedActionDefinition] = [:]
+
     /// Pending confirmation dialog state. Views observe this to show confirmation alerts.
     public var pendingConfirmation: PendingConfirmation?
 
@@ -36,7 +40,7 @@ public final class ActionDispatcher: ActionDispatching {
     // MARK: - Dispatch
 
     public func dispatch(_ spec: ActionSpec, scope: any ScopeReading) async {
-        // 1. Guard evaluation: if guard expression is false, skip.
+        // Step 1: Guard evaluation -- if guard expression is false, skip entirely.
         if let guardExpr = spec.guard {
             if !evaluate(expression: guardExpr, scope: scope) {
                 logger.debug("Action \(spec.action) blocked by guard: \(guardExpr)")
@@ -44,37 +48,79 @@ public final class ActionDispatcher: ActionDispatching {
             }
         }
 
-        // 2. Confirmation dialog: if confirm is set, wait for user response.
-        if let confirm = spec.confirm {
+        // Step 2: Named action resolution -- resolve before confirm/haptic so that
+        // merged confirm/onSuccess/onError from the named definition are applied.
+        let resolved = resolveNamedAction(spec)
+        guard let resolved else { return }
+
+        // Step 3: Confirmation dialog -- uses the resolved (merged) confirm.
+        if let confirm = resolved.confirm {
             let confirmed = await requestConfirmation(confirm)
             if !confirmed { return }
         }
 
-        // 3. Haptic feedback.
-        if let haptic = spec.haptic {
+        // Step 4: Haptic feedback.
+        if let haptic = resolved.haptic {
             triggerHaptic(haptic)
         }
 
-        // 4. Dispatch through middleware chain, then handler.
-        let action = spec.action
-        let params = spec.params ?? [:]
+        // Step 5: Middleware chain + handler dispatch.
+        let action = resolved.action
+        let params = resolved.params ?? [:]
         let handlerError = await runMiddlewareChain(
             index: 0, action: action, params: params, scope: scope
         )
 
+        // Step 6: Success/error chaining.
         if let handlerError {
             logger.error("Action \(action) failed: \(handlerError.localizedDescription)")
-
-            // 5. On error chain.
-            if let onError = spec.onError {
+            if let onError = resolved.onError {
                 await dispatch(onError.value, scope: scope)
             }
         } else {
-            // 6. On success chain.
-            if let onSuccess = spec.onSuccess {
+            if let onSuccess = resolved.onSuccess {
                 await dispatch(onSuccess.value, scope: scope)
             }
         }
+    }
+
+    // MARK: - Named Action Resolution
+
+    /// Resolve named actions from the screen's actions map.
+    /// If the action is built-in or has a registered handler, returns the spec unchanged.
+    /// If it matches a screen-level named action, resolves to a `submit` action.
+    /// Returns nil if the action cannot be resolved (logs a warning).
+    private func resolveNamedAction(_ spec: ActionSpec) -> ActionSpec? {
+        // Check built-in actions and registered handlers first.
+        if SDUIAction(rawValue: spec.action) != nil || handlers[spec.action] != nil {
+            return spec
+        }
+
+        // Check screen-level named actions.
+        guard let definition = screenActions[spec.action] else {
+            logger.warning("Unresolved action: \(spec.action) -- not built-in, registered, or in screen actions")
+            return nil
+        }
+
+        // Build submit params from the named definition.
+        var submitParams: JSONObject = ["endpoint": .string(definition.endpoint)]
+        if let method = definition.method {
+            submitParams["method"] = .string(method)
+        }
+
+        // Merge: inline spec overrides named definition defaults.
+        let resolvedConfirm = spec.confirm ?? definition.confirm
+        let resolvedOnSuccess = spec.onSuccess ?? definition.onSuccess
+        let resolvedOnError = spec.onError ?? definition.onError
+
+        return ActionSpec(
+            action: "submit",
+            params: submitParams,
+            confirm: resolvedConfirm,
+            haptic: spec.haptic,
+            onSuccess: resolvedOnSuccess,
+            onError: resolvedOnError
+        )
     }
 
     // MARK: - Internal

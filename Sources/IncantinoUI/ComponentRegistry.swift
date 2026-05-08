@@ -11,11 +11,20 @@ public struct SDUIContext {
     public let scope: any ScopeReading
     public let dispatch: any ActionDispatching
     public let theme: any ThemeReading
+    /// Named action definitions from the current screen's `actions` map.
+    /// Used by ActionDispatcher for named action resolution (step 5 of the pipeline).
+    public let screenActions: [String: NamedActionDefinition]
 
-    public init(scope: any ScopeReading, dispatch: any ActionDispatching, theme: any ThemeReading) {
+    public init(
+        scope: any ScopeReading,
+        dispatch: any ActionDispatching,
+        theme: any ThemeReading,
+        screenActions: [String: NamedActionDefinition] = [:]
+    ) {
         self.scope = scope
         self.dispatch = dispatch
         self.theme = theme
+        self.screenActions = screenActions
     }
 }
 

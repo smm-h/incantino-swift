@@ -36,6 +36,24 @@ public struct ActionSpec: Codable, Sendable {
     public let onSuccess: Box<ActionSpec>?
     public let onError: Box<ActionSpec>?
 
+    public init(
+        action: String,
+        params: JSONObject? = nil,
+        guard: String? = nil,
+        confirm: ConfirmSpec? = nil,
+        haptic: String? = nil,
+        onSuccess: Box<ActionSpec>? = nil,
+        onError: Box<ActionSpec>? = nil
+    ) {
+        self.action = action
+        self.params = params
+        self.guard = `guard`
+        self.confirm = confirm
+        self.haptic = haptic
+        self.onSuccess = onSuccess
+        self.onError = onError
+    }
+
     public struct ConfirmSpec: Codable, Sendable {
         public let title: String
         public let message: String
@@ -167,6 +185,21 @@ public struct ScreenSpec: Codable, Sendable {
     public let background: String?
     public let sections: [SectionSpec]
     public let data: [String: DataSourceSpec]?
+    /// Named action definitions. Inline ActionSpecs referencing a key here
+    /// resolve to a `submit` action with the definition's endpoint/method.
+    public let actions: [String: NamedActionDefinition]?
+}
+
+// MARK: - NamedActionDefinition
+
+/// A reusable action definition in a screen's `actions` map.
+/// Resolved to a `submit` action with `endpoint` and `method` as params.
+public struct NamedActionDefinition: Codable, Sendable {
+    public let endpoint: String
+    public let method: String?
+    public let confirm: ActionSpec.ConfirmSpec?
+    public let onSuccess: Box<ActionSpec>?
+    public let onError: Box<ActionSpec>?
 }
 
 // MARK: - DataSourceSpec

@@ -84,7 +84,8 @@ public struct ListComponent: IncantinoComponent {
                         let itemContext = SDUIContext(
                             scope: itemScope,
                             dispatch: context.dispatch,
-                            theme: context.theme
+                            theme: context.theme,
+                            screenActions: context.screenActions
                         )
                         if let view = registry.resolve(templateSpec, context: itemContext) {
                             view
