@@ -218,13 +218,15 @@ private func coerceToDate(_ value: ScopeValue) -> Date? {
 }
 
 // Cached ISO 8601 formatters (configured once, thread-safe for parsing).
-private let iso8601Formatter: ISO8601DateFormatter = {
+// nonisolated(unsafe) is safe here: formatters are fully configured before use
+// and never mutated again. Foundation formatters are thread-safe for read operations.
+private nonisolated(unsafe) let iso8601Formatter: ISO8601DateFormatter = {
     let f = ISO8601DateFormatter()
     f.formatOptions = [.withInternetDateTime]
     return f
 }()
 
-private let iso8601FractionalFormatter: ISO8601DateFormatter = {
+private nonisolated(unsafe) let iso8601FractionalFormatter: ISO8601DateFormatter = {
     let f = ISO8601DateFormatter()
     f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
     return f
@@ -293,7 +295,7 @@ private func applyAbs(_ value: ScopeValue) -> ScopeValue {
 
 // Cached currency formatter keyed by currency code.
 // Using NSCache for thread-safe lazy caching per currency code.
-private let currencyFormatterCache: NSCache<NSString, NumberFormatter> = {
+private nonisolated(unsafe) let currencyFormatterCache: NSCache<NSString, NumberFormatter> = {
     let cache = NSCache<NSString, NumberFormatter>()
     cache.countLimit = 20
     return cache
@@ -433,7 +435,7 @@ private let dateFormattingLocale = Locale(identifier: "en_US")
 private let dateFormattingTimeZone = TimeZone(identifier: "UTC")!
 
 // Cached DateFormatters (configured once, thread-safe for formatting).
-private let dateMediumFormatter: DateFormatter = {
+private nonisolated(unsafe) let dateMediumFormatter: DateFormatter = {
     let f = DateFormatter()
     f.dateStyle = .medium
     f.timeStyle = .none
@@ -442,7 +444,7 @@ private let dateMediumFormatter: DateFormatter = {
     return f
 }()
 
-private let timeShortFormatter: DateFormatter = {
+private nonisolated(unsafe) let timeShortFormatter: DateFormatter = {
     let f = DateFormatter()
     f.dateStyle = .none
     f.timeStyle = .short
@@ -451,7 +453,7 @@ private let timeShortFormatter: DateFormatter = {
     return f
 }()
 
-private let dateTimeMediumShortFormatter: DateFormatter = {
+private nonisolated(unsafe) let dateTimeMediumShortFormatter: DateFormatter = {
     let f = DateFormatter()
     f.dateStyle = .medium
     f.timeStyle = .short
@@ -508,7 +510,7 @@ private func applyRelativeTime(_ value: ScopeValue) -> ScopeValue {
     #endif
 }
 
-private let yearFormatter: DateFormatter = {
+private nonisolated(unsafe) let yearFormatter: DateFormatter = {
     let f = DateFormatter()
     f.dateFormat = "yyyy"
     f.locale = dateFormattingLocale
