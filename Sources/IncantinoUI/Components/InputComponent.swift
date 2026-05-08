@@ -111,10 +111,6 @@ public struct InputComponent: IncantinoComponent {
 
     private func writeToScope(_ value: String) {
         guard let binding = spec.effectiveBinding else { return }
-        if let scope = context.scope as? FormScope {
-            scope.set(binding, value: .text(value))
-        } else if let scope = context.scope as? DictionaryScope {
-            scope.set(binding, value: .text(value))
-        }
+        context.writeToScope(binding, value: .text(value))
     }
 }

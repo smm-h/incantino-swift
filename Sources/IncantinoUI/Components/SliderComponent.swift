@@ -54,10 +54,6 @@ public struct SliderComponent: IncantinoComponent {
 
     private func writeToScope(_ val: Double) {
         guard let binding = spec.effectiveBinding else { return }
-        if let scope = context.scope as? FormScope {
-            scope.set(binding, value: .number(val))
-        } else if let scope = context.scope as? DictionaryScope {
-            scope.set(binding, value: .number(val))
-        }
+        context.writeToScope(binding, value: .number(val))
     }
 }

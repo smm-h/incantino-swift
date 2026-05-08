@@ -39,10 +39,6 @@ public struct ToggleComponent: IncantinoComponent {
 
     private func writeToScope(_ value: Bool) {
         guard let binding = spec.effectiveBinding else { return }
-        if let scope = context.scope as? FormScope {
-            scope.set(binding, value: .bool(value))
-        } else if let scope = context.scope as? DictionaryScope {
-            scope.set(binding, value: .bool(value))
-        }
+        context.writeToScope(binding, value: .bool(value))
     }
 }

@@ -26,6 +26,11 @@ public struct SDUIContext {
         self.theme = theme
         self.screenActions = screenActions
     }
+
+    /// Write a value to scope if it conforms to ScopeWriting (FormScope, DictionaryScope, etc.).
+    public func writeToScope(_ key: String, value: ScopeValue) {
+        (scope as? any ScopeWriting)?.set(key, value: value)
+    }
 }
 
 // MARK: - IncantinoComponent

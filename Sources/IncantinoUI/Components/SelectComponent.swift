@@ -139,18 +139,10 @@ public struct SelectComponent: IncantinoComponent {
         let p = spec.properties ?? [:]
         let mode = p.string(forKey: "mode") ?? "single"
 
-        if let scope = context.scope as? FormScope {
-            if mode == "single" {
-                scope.set(binding, value: .text(selected.first ?? ""))
-            } else {
-                scope.set(binding, value: .selection(selected))
-            }
-        } else if let scope = context.scope as? DictionaryScope {
-            if mode == "single" {
-                scope.set(binding, value: .text(selected.first ?? ""))
-            } else {
-                scope.set(binding, value: .selection(selected))
-            }
+        if mode == "single" {
+            context.writeToScope(binding, value: .text(selected.first ?? ""))
+        } else {
+            context.writeToScope(binding, value: .selection(selected))
         }
     }
 }
