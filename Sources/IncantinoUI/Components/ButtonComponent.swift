@@ -22,13 +22,7 @@ public struct ButtonComponent: IncantinoComponent {
         let style = p.string(forKey: "style") ?? "primary"
         let iconName = p.string(forKey: "icon")
 
-        // Evaluate enabled expression against scope.
-        let isEnabled: Bool
-        if let enabledExpr = p.string(forKey: "enabled") {
-            isEnabled = evaluate(expression: enabledExpr, scope: context.scope)
-        } else {
-            isEnabled = true
-        }
+        let isEnabled = p.string(forKey: "enabled").map { evaluate(expression: $0, scope: context.scope) } ?? true
 
         Button {
             guard let action = spec.action else { return }
