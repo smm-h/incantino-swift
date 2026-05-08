@@ -106,7 +106,13 @@ public struct SectionSpec: Codable, Sendable {
         try container.encodeIfPresent(action, forKey: .action)
         try container.encodeIfPresent(validation, forKey: .validation)
         try container.encodeIfPresent(animation, forKey: .animation)
-        try container.encodeIfPresent(slots, forKey: .slots)
+        if let slots = slots {
+            var slotsDict: [String: OneOrMany] = [:]
+            for (key, sections) in slots {
+                slotsDict[key] = sections.count == 1 ? .one(sections[0]) : .many(sections)
+            }
+            try container.encode(slotsDict, forKey: .slots)
+        }
     }
 }
 
