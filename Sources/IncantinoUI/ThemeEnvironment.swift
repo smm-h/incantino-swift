@@ -1,8 +1,8 @@
 import SwiftUI
 
 /// Environment key for injecting a theme into the SwiftUI view hierarchy.
-struct ThemeKey: EnvironmentKey {
-    nonisolated(unsafe) static let defaultValue: any ThemeReading = DefaultTheme()
+struct ThemeKey: @preconcurrency EnvironmentKey {
+    @MainActor static let defaultValue: any ThemeReading = DefaultTheme()
 }
 
 extension EnvironmentValues {
