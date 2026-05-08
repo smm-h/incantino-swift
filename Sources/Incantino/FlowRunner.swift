@@ -17,7 +17,7 @@ public struct FlowStepConfig: Codable, Sendable {
     public let branchOn: String?
     /// Maps expression result string to target step ID. Used with `branchOn`.
     public let branches: [String: String]?
-    /// References another flow by ID. Signals that a sub-flow should be launched.
+    /// References another flow by ID; the host view is responsible for launching nested flow runners.
     public let subFlow: String?
 
     public init(
