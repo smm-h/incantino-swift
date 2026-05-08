@@ -154,7 +154,7 @@ public final class EmptyScope: ScopeReading, Sendable {
 
 /// Resolve a property suffix on a scope value.
 /// Used by DictionaryScope and other ScopeReading implementations.
-func resolveProperty(_ property: String, on value: ScopeValue) -> ScopeValue {
+public func resolveProperty(_ property: String, on value: ScopeValue) -> ScopeValue {
     // Terminal properties.
     switch property {
     case "isEmpty":
@@ -176,7 +176,7 @@ func resolveProperty(_ property: String, on value: ScopeValue) -> ScopeValue {
 }
 
 /// Walk a dot-path into a JSON value tree.
-func resolveJsonPath(_ path: String, on jsonVal: JSONValue) -> ScopeValue {
+public func resolveJsonPath(_ path: String, on jsonVal: JSONValue) -> ScopeValue {
     if case .null = jsonVal {
         return .json(.null)
     }

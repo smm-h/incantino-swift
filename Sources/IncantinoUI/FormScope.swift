@@ -10,7 +10,6 @@ import Observation
 
 /// Observable scope for form data within a screen or modal.
 /// Supports lexical scoping via parent, validation errors, and dirty tracking.
-@MainActor
 @Observable
 public final class FormScope: ScopeWriting, @unchecked Sendable {
     private let lock = NSLock()
