@@ -24,9 +24,14 @@ public struct CardRenderer: View {
     public var body: some View {
         VStack(spacing: 0) {
             let visible = card.sections.visible(scope: context.scope)
-            ForEach(Array(visible.enumerated()), id: \.element.id) { _, section in
+            ForEach(Array(visible.enumerated()), id: \.element.id) { index, section in
                 if let view = registry.resolve(section, context: context) {
                     view
+                        .sectionAnimation(
+                            section.animation,
+                            siblingIndex: index,
+                            theme: context.theme
+                        )
                 } else {
                     let _ = logger.warning("Unknown component type: \(section.component)")
                     EmptyView()

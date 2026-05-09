@@ -27,8 +27,13 @@ public struct ScreenRenderer: View {
         ScrollView {
             LazyVStack(spacing: 0) {
                 let visible = screen.sections.visible(scope: context.scope)
-                ForEach(Array(visible.enumerated()), id: \.element.id) { _, section in
+                ForEach(Array(visible.enumerated()), id: \.element.id) { index, section in
                     resolveSection(section)
+                        .sectionAnimation(
+                            section.animation,
+                            siblingIndex: index,
+                            theme: context.theme
+                        )
                 }
             }
         }
