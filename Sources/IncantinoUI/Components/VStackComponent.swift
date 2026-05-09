@@ -21,6 +21,8 @@ public struct VStackComponent: IncantinoComponent {
         let spacing = p.double(forKey: "spacing") ?? 0
         let alignment = horizontalAlignment(from: p.string(forKey: "alignment"))
         let padding = p.double(forKey: "padding")
+        let paddingH = p.double(forKey: "paddingHorizontal")
+        let paddingV = p.double(forKey: "paddingVertical")
 
         VStack(alignment: alignment, spacing: spacing) {
             let visible = (spec.children ?? []).visible(scope: context.scope)
@@ -31,6 +33,8 @@ public struct VStackComponent: IncantinoComponent {
             }
         }
         .padding(padding.map { CGFloat($0) } ?? 0)
+        .padding(.horizontal, paddingH.map { CGFloat($0) } ?? 0)
+        .padding(.vertical, paddingV.map { CGFloat($0) } ?? 0)
     }
 
     private func horizontalAlignment(from value: String?) -> HorizontalAlignment {

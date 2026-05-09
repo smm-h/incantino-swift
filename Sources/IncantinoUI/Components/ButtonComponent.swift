@@ -23,6 +23,7 @@ public struct ButtonComponent: IncantinoComponent {
         let iconName = p.string(forKey: "icon")
 
         let isEnabled = p.string(forKey: "enabled").map { evaluate(expression: $0, scope: context.scope) } ?? true
+        let fixedHeight = p.double(forKey: "height")
 
         Button {
             guard let action = spec.action else { return }
@@ -39,8 +40,9 @@ public struct ButtonComponent: IncantinoComponent {
                 Text(label)
             }
             .frame(maxWidth: style == "ghost" ? nil : .infinity)
+            .frame(height: fixedHeight.map { CGFloat($0) })
             .padding(.horizontal, theme.spacingMD)
-            .padding(.vertical, theme.spacingSM)
+            .padding(.vertical, fixedHeight == nil ? theme.spacingSM : 0)
             .background(backgroundColor(style: style))
             .foregroundStyle(foregroundColor(style: style))
             .clipShape(RoundedRectangle(cornerRadius: theme.buttonCornerRadius))

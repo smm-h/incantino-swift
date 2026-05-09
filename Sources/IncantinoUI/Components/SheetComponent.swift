@@ -24,6 +24,8 @@ public struct SheetComponent: IncantinoComponent {
             TextInterpolator.resolve($0, scope: context.scope)
         }
         let detent = p.string(forKey: "detent") ?? "large"
+        let scrollable = p.bool(forKey: "scrollable") ?? true
+        let backgroundColorName = p.string(forKey: "background")
 
         // The sheet is presented as a .sheet modifier on an empty anchor view.
         Color.clear
@@ -38,35 +40,54 @@ public struct SheetComponent: IncantinoComponent {
                     }
                 }
             } content: {
-                VStack(spacing: 0) {
-                    // Drag handle.
-                    Capsule()
-                        .fill(theme.separator)
-                        .frame(width: 36, height: 5)
-                        .padding(.top, theme.spacingSM)
-
-                    if let title {
-                        Text(title)
-                            .font(theme.font(style: .headline))
-                            .padding(.top, theme.spacingSM)
-                    }
-
-                    // Children content.
-                    ScrollView {
-                        VStack(spacing: 0) {
-                            let visible = (spec.children ?? []).visible(scope: context.scope)
-                            ForEach(Array(visible.enumerated()), id: \.element.id) { _, child in
-                                if let view = registry.resolve(child, context: context) {
-                                    view
-                                }
-                            }
-                        }
-                    }
-                }
-                .presentationDetents(sheetDetents(detent))
-                .presentationDragIndicator(.visible)
-                .accessibilityLabel(title ?? "Sheet")
+                sheetContent(title: title, scrollable: scrollable, backgroundColorName: backgroundColorName)
+                    .presentationDetents(sheetDetents(detent))
+                    .presentationDragIndicator(.visible)
+                    .accessibilityLabel(title ?? "Sheet")
             }
+    }
+
+    @ViewBuilder
+    private func sheetContent(title: String?, scrollable: Bool, backgroundColorName: String?) -> some View {
+        let content = VStack(spacing: 0) {
+            // Drag handle.
+            Capsule()
+                .fill(theme.separator)
+                .frame(width: 36, height: 5)
+                .padding(.top, theme.spacingSM)
+
+            if let title {
+                Text(title)
+                    .font(theme.font(style: .headline))
+                    .padding(.top, theme.spacingSM)
+            }
+
+            // Children content: scrollable or fixed layout.
+            if scrollable {
+                ScrollView {
+                    childrenStack
+                }
+            } else {
+                childrenStack
+            }
+        }
+
+        if let backgroundColorName {
+            content.background(resolveColor(backgroundColorName, theme: theme))
+        } else {
+            content
+        }
+    }
+
+    private var childrenStack: some View {
+        VStack(spacing: 0) {
+            let visible = (spec.children ?? []).visible(scope: context.scope)
+            ForEach(Array(visible.enumerated()), id: \.element.id) { _, child in
+                if let view = registry.resolve(child, context: context) {
+                    view
+                }
+            }
+        }
     }
 
     private func sheetDetents(_ detent: String) -> Set<PresentationDetent> {
