@@ -84,3 +84,17 @@ extension ThemeReading {
 public enum TypographyStyle: String, CaseIterable, Sendable {
     case largeTitle, title, headline, subheadline, body, caption, price
 }
+
+// MARK: - Convenience Font Properties
+
+/// Shorthand access to typography tokens as computed properties.
+/// Avoids verbose `theme.font(style: .body)` in component code.
+extension ThemeReading {
+    public var largeTitle: Font { font(style: .largeTitle) }
+    public var title: Font { font(style: .title) }
+    public var headline: Font { font(style: .headline) }
+    public var subheadline: Font { font(style: .subheadline) }
+    public var body: Font { font(style: .body) }
+    public var caption: Font { font(style: .caption) }
+    public var priceDisplay: Font { font(style: .price) }
+}

@@ -58,6 +58,12 @@ public final class ComponentRegistry {
         factories[C.typeName] = { spec, ctx in AnyView(C(spec: spec, context: ctx)) }
     }
 
+    /// Register a component type under a custom name (alias).
+    /// Use this to map legacy or kebab-case type names to their implementations.
+    public func register<C: IncantinoComponent>(_ name: String, as type: C.Type) {
+        factories[name] = { spec, ctx in AnyView(C(spec: spec, context: ctx)) }
+    }
+
     /// Resolve a section spec to a rendered view.
     /// Returns nil for unknown component types (caller should render nothing and log).
     public func resolve(_ spec: SectionSpec, context: SDUIContext) -> AnyView? {
