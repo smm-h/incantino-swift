@@ -72,7 +72,7 @@ public final class FlowRunner: @unchecked Sendable {
     public let flowScope: DictionaryScope
 
     /// Current step index.
-    private var currentIndex: Int = 0
+    public private(set) var currentIndex: Int = 0
 
     /// Whether the flow has completed.
     private var _isComplete: Bool = false
