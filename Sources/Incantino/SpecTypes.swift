@@ -306,6 +306,29 @@ extension SectionSpec {
     }
 }
 
+// MARK: - Recursive section collection
+
+extension Array where Element == SectionSpec {
+    /// Collect all sections recursively -- this array plus every descendant
+    /// found in children and slot values. Used by validation-before-advance
+    /// to find all bindable/validatable sections in a screen.
+    public func allSectionsRecursive() -> [SectionSpec] {
+        var result: [SectionSpec] = []
+        for section in self {
+            result.append(section)
+            if let children = section.children {
+                result.append(contentsOf: children.allSectionsRecursive())
+            }
+            if let slots = section.slots {
+                for sections in slots.values {
+                    result.append(contentsOf: sections.allSectionsRecursive())
+                }
+            }
+        }
+        return result
+    }
+}
+
 // MARK: - Visibility filtering
 
 extension Array where Element == SectionSpec {

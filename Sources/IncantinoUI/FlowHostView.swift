@@ -77,8 +77,19 @@ public struct FlowHostView: View {
 
     // MARK: - Flow navigation
 
-    /// Advance the flow. Call this from action dispatch when flow.next fires.
+    /// Advance the flow. Validates the current step's form fields first;
+    /// if any validation rule fails, the advance is suppressed and errors
+    /// are populated on the FormScope (input components display them).
     public func advance() {
+        // Validate current step before advancing.
+        if let screen = screens[currentScreenId],
+           let formScope = context.scope as? FormScope {
+            let sections = screen.sections.allSectionsRecursive()
+            if !formScope.validate(sections: sections) {
+                return
+            }
+        }
+
         if let nextId = flowRunner.advance(scope: context.scope) {
             currentScreenId = nextId
         } else {
