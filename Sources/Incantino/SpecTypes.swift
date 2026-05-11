@@ -58,6 +58,12 @@ public struct ActionSpec: Codable, Sendable {
         public let title: String
         public let message: String
         public let destructive: Bool?
+
+        public init(title: String, message: String, destructive: Bool? = nil) {
+            self.title = title
+            self.message = message
+            self.destructive = destructive
+        }
     }
 }
 
@@ -122,6 +128,30 @@ public struct SectionSpec: Codable, Sendable {
     private enum CodingKeys: String, CodingKey {
         case id, component, properties, slots, children,
              visibility, binding, action, validation, animation
+    }
+
+    public init(
+        id: String = UUID().uuidString,
+        component: String,
+        properties: JSONObject? = nil,
+        slots: [String: [SectionSpec]]? = nil,
+        children: [SectionSpec]? = nil,
+        visibility: String? = nil,
+        binding: String? = nil,
+        action: ActionSpec? = nil,
+        validation: [ValidationRule]? = nil,
+        animation: AnimationSpec? = nil
+    ) {
+        self.id = id
+        self.component = component
+        self.properties = properties
+        self.slots = slots
+        self.children = children
+        self.visibility = visibility
+        self.binding = binding
+        self.action = action
+        self.validation = validation
+        self.animation = animation
     }
 
     public init(from decoder: Decoder) throws {
@@ -205,6 +235,11 @@ public struct ValidationRule: Codable, Sendable {
     public let condition: String
     /// Error message shown when validation fails.
     public let message: String
+
+    public init(condition: String, message: String) {
+        self.condition = condition
+        self.message = message
+    }
 }
 
 // MARK: - AnimationSpec
@@ -214,6 +249,11 @@ public struct AnimationSpec: Codable, Sendable {
     public let entry: String?
     /// Animation token name for press feedback.
     public let press: String?
+
+    public init(entry: String? = nil, press: String? = nil) {
+        self.entry = entry
+        self.press = press
+    }
 }
 
 // MARK: - ScreenSpec
@@ -228,6 +268,22 @@ public struct ScreenSpec: Codable, Sendable {
     /// Named action definitions. Inline ActionSpecs referencing a key here
     /// resolve to a `submit` action with the definition's endpoint/method.
     public let actions: [String: NamedActionDefinition]?
+
+    public init(
+        id: String,
+        title: String? = nil,
+        background: String? = nil,
+        sections: [SectionSpec] = [],
+        data: [String: DataSourceSpec]? = nil,
+        actions: [String: NamedActionDefinition]? = nil
+    ) {
+        self.id = id
+        self.title = title
+        self.background = background
+        self.sections = sections
+        self.data = data
+        self.actions = actions
+    }
 }
 
 // MARK: - NamedActionDefinition
@@ -240,6 +296,20 @@ public struct NamedActionDefinition: Codable, Sendable {
     public let confirm: ActionSpec.ConfirmSpec?
     public let onSuccess: Box<ActionSpec>?
     public let onError: Box<ActionSpec>?
+
+    public init(
+        endpoint: String,
+        method: String? = nil,
+        confirm: ActionSpec.ConfirmSpec? = nil,
+        onSuccess: Box<ActionSpec>? = nil,
+        onError: Box<ActionSpec>? = nil
+    ) {
+        self.endpoint = endpoint
+        self.method = method
+        self.confirm = confirm
+        self.onSuccess = onSuccess
+        self.onError = onError
+    }
 }
 
 // MARK: - DataSourceSpec
@@ -249,6 +319,18 @@ public struct DataSourceSpec: Codable, Sendable {
     public let endpoint: String
     public let params: JSONObject?
     public let options: JSONObject?
+
+    public init(
+        source: String,
+        endpoint: String,
+        params: JSONObject? = nil,
+        options: JSONObject? = nil
+    ) {
+        self.source = source
+        self.endpoint = endpoint
+        self.params = params
+        self.options = options
+    }
 }
 
 // MARK: - CardSpec
@@ -256,6 +338,10 @@ public struct DataSourceSpec: Codable, Sendable {
 /// A card shown inline (e.g., in chat). Just a list of sections.
 public struct CardSpec: Codable, Sendable {
     public let sections: [SectionSpec]
+
+    public init(sections: [SectionSpec]) {
+        self.sections = sections
+    }
 }
 
 // MARK: - ScopePathDeclaration
@@ -267,6 +353,18 @@ public struct ScopePathDeclaration: Codable, Sendable {
     public let type: ScopeValueType
     public let defaultValue: JSONValue?
     public let source: ScopeSource?
+
+    public init(
+        path: String,
+        type: ScopeValueType,
+        defaultValue: JSONValue? = nil,
+        source: ScopeSource? = nil
+    ) {
+        self.path = path
+        self.type = type
+        self.defaultValue = defaultValue
+        self.source = source
+    }
 }
 
 /// Data type of a scope path value.
