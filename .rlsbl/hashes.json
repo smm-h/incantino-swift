@@ -1,7 +1,7 @@
 {
   ".github/workflows/ci.yml": "136c750106d1956ba6ef87cbf5ee53ee867cf005ec55aefaf67a8b422dcebf94",
   "CHANGELOG.md": "fca781960bc4a70fce00e622926810542c6c62b34357a1228fa2e8432108c013",
-  ".gitignore": "5997d10bd2597a912beff932e3135e88f40c7dd0390c368ad3bfd0953a4d8a04",
+  ".gitignore": "c89d76c6c43e7f0897b3472a15b7c0103e0be5b3a04c2b44e585fa48bdcda2bb",
   "LICENSE": "e958892abc1dd5d991fca6d528e695d335f25773d373d2e0be5f4a9507d8f8d5",
   "CLAUDE.md": "bd7614592f2d4b948d1c8dfb128a09e01e57d826ca79766fa341506bc3b7b38d",
   ".rlsbl/hooks/pre-release.sh": "9bae4134d0a4c302287766f9a4a2923b6c5706d2cc7078f553fec843b8cd5a06",
