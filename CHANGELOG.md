@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.0
+
+- Public memberwise initializers for all spec types (SectionSpec, ScreenSpec, CardSpec, DataSourceSpec, ValidationRule, AnimationSpec, ConfirmSpec, NamedActionDefinition, ScopePathDeclaration)
+
 ## 0.1.0
 
 - Initial release of Incantino iOS SDUI engine
